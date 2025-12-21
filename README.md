@@ -13,6 +13,7 @@ infrastructure work, and I am itching to write actual code.
 
 Here are some of the goals I would like to achieve for this project.
 - [ ] Learn basic Golang constructs with standard I/O
+    - [x] Go through "A Tour of Go"
 - [ ] Write basic decoder for uncompressed Parquet files
 - [ ] Write test cases and compare results with the established Apache Parquet-Go implementation
 - [ ] Use Golang coroutines (Goroutines) to vertically scale decoding
