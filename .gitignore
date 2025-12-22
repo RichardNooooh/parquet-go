@@ -1,0 +1,15 @@
+# pulled from https://toptal.com/developers/gitignore/api/go
+
+# binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# test binary
+*.test
+
+# output from coverage tool
+*.out
+
