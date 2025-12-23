@@ -5,8 +5,10 @@ import (
 	// "github.com/apache/thrift/lib/go/thrift"
 	// "internal/gen-go/parquet"
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -14,6 +16,29 @@ var PARQUET_MAGIC = []byte("PAR1")
 var ErrorNotParquet = errors.New("not a Parquet file")
 
 const WORD_LENGTH = 4
+
+func processFooterMetadata(file *os.File) (uint32, error) {
+	var footerLengthBuffer [WORD_LENGTH]byte
+
+	fileStat, err := file.Stat()
+	if err != nil {
+		return 0, fmt.Errorf("stat file error: %w", err)
+	}
+
+	fileSize := fileStat.Size()
+	count, err := file.ReadAt(footerLengthBuffer[:], fileSize-(2*WORD_LENGTH))
+	if err != nil {
+		return 0, fmt.Errorf("%w: missing file metadata size", ErrorNotParquet)
+	}
+	if count < WORD_LENGTH {
+		return 0, fmt.Errorf("%w: could not read enough bytes for file metadata size", ErrorNotParquet)
+	}
+
+	footerMetadataSize := binary.LittleEndian.Uint32(footerLengthBuffer[:])
+	log.Printf("file metadata size: %d\n", footerMetadataSize)
+
+	return footerMetadataSize, nil
+}
 
 func checkParquet(file *os.File) error {
 	fileStat, err := file.Stat()
@@ -64,5 +89,6 @@ func Start(fileName string) error {
 	if err != nil {
 		return fmt.Errorf("%v had Parquet check errors: %w", fileName, err)
 	}
+	processFooterMetadata(file)
 	return nil
 }
