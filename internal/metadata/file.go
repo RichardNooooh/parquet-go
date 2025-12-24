@@ -2,12 +2,11 @@ package metadata
 
 // "file" refers to the file metadata located at the footer of the Parquet file
 import (
-	"bytes"
 	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io"
+	"github.com/RichardNooooh/parquet-go/internal/types"
 
 	genparquet "github.com/RichardNooooh/parquet-go/internal/metadata/gen-go/parquet"
 	thrift "github.com/apache/thrift/lib/go/thrift"
@@ -18,12 +17,7 @@ var ErrNotParquet = errors.New("not a Parquet file")
 
 const wordLength = 4
 
-type FileReader struct {
-	reader io.ReaderAt
-	size   int64
-}
-
-func GetFileMetadata(ctx context.Context, file *FileReader) (*genparquet.FileMetaData, error) {
+func GetFileMetadata(ctx context.Context, file *types.FileReader) (*genparquet.FileMetaData, error) {
 	if err := checkParquet(file); err != nil {
 		return nil, err
 	}
@@ -33,7 +27,7 @@ func GetFileMetadata(ctx context.Context, file *FileReader) (*genparquet.FileMet
 	}
 
 	compactMetadataBuffer := make([]byte, fileMetadataSize)
-	count, err := file.reader.ReadAt(compactMetadataBuffer, file.size-2*wordLength-int64(fileMetadataSize))
+	count, err := file.Reader.ReadAt(compactMetadataBuffer, file.Size-2*wordLength-int64(fileMetadataSize))
 	if err != nil {
 		return nil, fmt.Errorf("unable to read footer metadata: %w", err)
 	}
@@ -62,10 +56,10 @@ func GetPageLocations(fileMetadata *genparquet.FileMetaData) ([]int64, error) {
 	return nil, nil
 }
 
-func getFileMetadataSize(file *FileReader) (int64, error) {
+func getFileMetadataSize(file *types.FileReader) (int64, error) {
 	var fileMetadataLengthBuffer [wordLength]byte
 
-	count, err := file.reader.ReadAt(fileMetadataLengthBuffer[:], int64(file.size-(2*wordLength)))
+	count, err := file.Reader.ReadAt(fileMetadataLengthBuffer[:], int64(file.Size-(2*wordLength)))
 	if err != nil {
 		return 0, fmt.Errorf("%w: missing file metadata size", ErrNotParquet)
 	}
@@ -74,7 +68,7 @@ func getFileMetadataSize(file *FileReader) (int64, error) {
 	}
 
 	fileMetadataSize := int64(binary.LittleEndian.Uint32(fileMetadataLengthBuffer[:]))
-	if fileMetadataSize > file.size-2*wordLength {
+	if fileMetadataSize > file.Size-2*wordLength {
 		return 0, fmt.Errorf("%w: file metadata too large (%d bytes)", ErrNotParquet, fileMetadataSize)
 	} else if fileMetadataSize == 0 {
 		return 0, fmt.Errorf("%w: file metadata is of size 0", ErrNotParquet)
@@ -92,7 +86,7 @@ func getFileMetadataSize(file *FileReader) (int64, error) {
 //
 // 	fileStat, err := file.Stat()
 // 	if err != nil {
-// 		return fmt.Errorf("could not read file size: %w", err)
+// 		return fmt.Errorf("could not read file.Size: %w", err)
 // 	}
 //
 // 	fileReader := &FileReader{file, fileStat.Size()}
