@@ -67,7 +67,7 @@ func getFileMetadataSize(file *types.FileReader) (int64, error) {
 	}
 
 	fileMetadataSize := int64(binary.LittleEndian.Uint32(fileMetadataLenBuffer[:]))
-	if fileMetadataSize > file.Size-2*wordLength {
+	if fileMetadataSize > file.Size-3*wordLength {
 		return 0, fmt.Errorf("%w: file metadata too large (%d bytes)", ErrNotParquet, fileMetadataSize)
 	} else if fileMetadataSize == 0 {
 		return 0, fmt.Errorf("%w: file metadata is of size 0", ErrNotParquet)
