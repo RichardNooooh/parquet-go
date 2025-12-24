@@ -15,8 +15,10 @@ Here are some of the goals I would like to achieve for this project.
 - [x] Learn basic Golang constructs with standard I/O
     - [x] Go through "A Tour of Go"
 - [ ] Write basic decoder for uncompressed Parquet files
-    - [ ] Write footer metadata reader with generated Go-Thrift library
-- [ ] Write test cases and compare results with the established Apache Parquet-Go implementation
+    - [x] Write footer metadata reader with generated Go-Thrift library
+    - [ ] Write basic unit tests for metadata processing
+    - [ ] Write column and page traversal
+- [ ] Write E2E test cases and compare results with the established Apache Parquet-Go implementation
 - [ ] Use Golang coroutines (Goroutines) to vertically scale decoding
 - [ ] Write basic encoder for uncompressed Parquet files (CSV -> Parquet)
 
