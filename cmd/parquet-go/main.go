@@ -31,26 +31,36 @@ func run() error {
 
 	switch command := os.Args[2]; command {
 	case "fileVersion":
-		output = fileMetadata.GetVersion()
+		output = fileMetadata.GetVersion() // supposed to be 1, but reading as "10k" ???
 	case "schema":
 		output = fileMetadata.GetSchema()
 	case "numRows":
 		output = fileMetadata.GetNumRows()
 	case "rowGroups":
 		output = fileMetadata.GetRowGroups()
+	case "firstRowGroup":
+		output = fileMetadata.GetRowGroups()[0]
+	case "firstRowGroupOffset":
+		output = fileMetadata.GetRowGroups()[0].GetFileOffset()
+	case "firstColumnChunk":
+		output = fileMetadata.GetRowGroups()[0].GetColumns()[0]
+	case "firstColumnMetadata":
+		output = fileMetadata.GetRowGroups()[0].GetColumns()[0].GetMetaData()
 	case "keyValues":
 		output = fileMetadata.GetKeyValueMetadata()
 	case "createdBy":
-		output = fileMetadata.GetCreatedBy()
+		output = fileMetadata.GetCreatedBy() // the suffix seems to end with "0k" or "Ok".
 	case "columnOrders":
 		output = fileMetadata.GetColumnOrders()
 	case "encryptionAlgo":
 		output = fileMetadata.GetEncryptionAlgorithm()
 	case "signingKeyMetadata":
 		output = fileMetadata.GetFooterSigningKeyMetadata()
+	default:
+		return fmt.Errorf("unknown command: %v\n", command)
 	}
 
-	fmt.Printf("%v", output)
+	fmt.Printf("%v\n", output)
 	// if os.Args[2] == "fileVersion" {
 	// 	output = fileMetadata.GetVersion()
 	// } else if os.Args[2] == "schema" {
@@ -74,6 +84,4 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	fmt.Println("Ok")
 }
