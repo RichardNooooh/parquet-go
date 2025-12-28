@@ -2,12 +2,72 @@ package metadata
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/RichardNooooh/parquet-go/internal/types"
 )
 
-func TestFileMetadataSize(t *testing.T) {
+func TestTimeStoredFileMetadataSize(t *testing.T) {
+	testcaseDir := filepath.Join(getTestcaseDirectory(), "timestored_examples")
+	groundTruthFile := filepath.Join(testcaseDir, "fileMetadataSizes.json")
+	testcases := *getExpectedFileMetadataSizes(groundTruthFile)
+	for name, expectedSize := range testcases {
+		t.Run(name, func(t *testing.T) {
+			testfilename := filepath.Join(testcaseDir, name+".parquet")
+
+			file, err := os.Open(testfilename)
+			if err != nil {
+				t.Errorf("%v: unable to open file %v", err, testfilename)
+			}
+			fileStat, err := file.Stat()
+			if err != nil {
+				t.Errorf("%v: unable to get filestat of %v", err, testfilename)
+			}
+
+			reader := types.NewReader(file, fileStat.Size())
+			size, err := getFileMetadataSize(reader)
+			if err != nil {
+				t.Errorf("%v: failed to read filemetadatasize of %v", err, testfilename)
+			}
+
+			if size != expectedSize {
+				t.Fatalf("%v: expected %d, got %d", testfilename, expectedSize, size)
+			}
+		})
+	}
+}
+
+func getTestcaseDirectory() string {
+	_, thisFile, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("runtime.Caller failed")
+	}
+
+	dir := filepath.Dir(thisFile)
+	return filepath.Clean(filepath.Join(dir, "..", "..", "testdata"))
+}
+
+func getExpectedFileMetadataSizes(filename string) *map[string]int64 {
+	file, err := os.ReadFile(filename)
+	fmt.Println(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	var sizes map[string]int64
+	if err := json.Unmarshal(file, &sizes); err != nil {
+		panic(err)
+	}
+
+	return &sizes
+}
+
+func TestFakeFileMetadataSize(t *testing.T) {
 	testcases := map[string]struct {
 		data  []byte
 		valid bool
