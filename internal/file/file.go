@@ -8,7 +8,7 @@ import (
 	"io"
 
 	format "github.com/RichardNooooh/parquet-go/internal/format/gen-go/parquet"
-	thrift "github.com/apache/thrift/lib/go/thrift"
+	"github.com/RichardNooooh/parquet-go/internal/thriftio"
 )
 
 type FileReader struct {
@@ -43,19 +43,7 @@ func GetFileMetadata(ctx context.Context, file *FileReader) (*format.FileMetaDat
 		return nil, fmt.Errorf("unable to read all footer metadata")
 	}
 
-	config := &thrift.TConfiguration{}
-	thriftBuffer := thrift.NewTMemoryBufferLen(int(fileMetadataSize))
-	_, err = thriftBuffer.Write(compactMetadataBuffer)
-	if err != nil {
-		return nil, fmt.Errorf("failed to transfer footer metadata to thrift buffer: %w", err)
-	}
-
-	protocolConfig := thrift.NewTCompactProtocolConf(thriftBuffer, config)
-	fileMetadata := format.NewFileMetaData()
-	err = fileMetadata.Read(ctx, protocolConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode thrift metadata: %w", err)
-	}
+	fileMetadata, err := thriftio.DecodeFileMetadata(ctx, compactMetadataBuffer, fileMetadataSize)
 
 	return fileMetadata, nil
 }
