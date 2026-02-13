@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -31,7 +32,7 @@ func run() error {
 
 	switch command := os.Args[2]; command {
 	case "fileVersion":
-		output = fileMetadata.GetVersion() // supposed to be 1, but reading as "10k" ???
+		output = fileMetadata.GetVersion()
 	case "schema":
 		output = fileMetadata.GetSchema()
 	case "numRows":
@@ -49,13 +50,17 @@ func run() error {
 	case "keyValues":
 		output = fileMetadata.GetKeyValueMetadata()
 	case "createdBy":
-		output = fileMetadata.GetCreatedBy() // the suffix seems to end with "0k" or "Ok".
+		output = fileMetadata.GetCreatedBy()
 	case "columnOrders":
 		output = fileMetadata.GetColumnOrders()
 	case "encryptionAlgo":
 		output = fileMetadata.GetEncryptionAlgorithm()
 	case "signingKeyMetadata":
 		output = fileMetadata.GetFooterSigningKeyMetadata()
+	case "print":
+		outputString, _ := json.Marshal(fileMetadata)
+		fmt.Println(string(outputString))
+		return nil
 	default:
 		return fmt.Errorf("unknown command: %v\n", command)
 	}
