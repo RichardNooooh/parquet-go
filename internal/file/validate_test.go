@@ -1,10 +1,8 @@
-package metadata
+package file
 
 import (
 	"bytes"
 	"testing"
-
-	"github.com/RichardNooooh/parquet-go/internal/types"
 )
 
 func TestMagicNumbers(t *testing.T) {
@@ -35,7 +33,7 @@ func TestMagicNumbers(t *testing.T) {
 
 	for name, test := range testcases {
 		t.Run(name, func(t *testing.T) {
-			reader := types.NewReader(bytes.NewReader(test.data), int64(len(test.data)))
+			reader := NewReader(bytes.NewReader(test.data), int64(len(test.data)))
 			err := checkParquet(reader)
 
 			if test.valid && err != nil {

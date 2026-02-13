@@ -1,13 +1,11 @@
-package metadata
+package file
 
 import (
 	"bytes"
 	"fmt"
-
-	"github.com/RichardNooooh/parquet-go/internal/types"
 )
 
-func checkParquet(file *types.FileReader) error {
+func checkParquet(file *FileReader) error {
 	size := file.Size
 	if size < 3*wordLength {
 		return fmt.Errorf("%w: file is too small! minimum size: %d, actual size: %d", ErrNotParquet, 3*wordLength, size)

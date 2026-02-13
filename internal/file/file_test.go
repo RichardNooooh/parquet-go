@@ -1,4 +1,4 @@
-package metadata
+package file
 
 import (
 	"bytes"
@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-
-	"github.com/RichardNooooh/parquet-go/internal/types"
 )
 
 func TestTimeStoredFileMetadataSize(t *testing.T) {
@@ -29,7 +27,7 @@ func TestTimeStoredFileMetadataSize(t *testing.T) {
 				t.Errorf("%v: unable to get filestat of %v", err, testfilename)
 			}
 
-			reader := types.NewReader(file, fileStat.Size())
+			reader := NewReader(file, fileStat.Size())
 			size, err := getFileMetadataSize(reader)
 			if err != nil {
 				t.Errorf("%v: failed to read filemetadatasize of %v", err, testfilename)
@@ -86,7 +84,7 @@ func TestFakeFileMetadataSize(t *testing.T) {
 
 	for name, test := range testcases {
 		t.Run(name, func(t *testing.T) {
-			reader := types.NewReader(bytes.NewReader(test.data), int64(len(test.data)))
+			reader := NewReader(bytes.NewReader(test.data), int64(len(test.data)))
 			size, err := getFileMetadataSize(reader)
 
 			if test.valid && err != nil {

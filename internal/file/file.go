@@ -1,22 +1,31 @@
-package metadata
+package file
 
 import (
 	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/RichardNooooh/parquet-go/internal/types"
+	"io"
 
-	format "github.com/RichardNooooh/parquet-go/internal/metadata/gen-go/parquet"
+	format "github.com/RichardNooooh/parquet-go/internal/format/gen-go/parquet"
 	thrift "github.com/apache/thrift/lib/go/thrift"
 )
+
+type FileReader struct {
+	Reader io.ReaderAt
+	Size   int64
+}
+
+func NewReader(reader io.ReaderAt, size int64) *FileReader {
+	return &FileReader{reader, size}
+}
 
 var parquetMagic = []byte("PAR1")
 var ErrNotParquet = errors.New("not a Parquet file")
 
 const wordLength = 4
 
-func GetFileMetadata(ctx context.Context, file *types.FileReader) (*format.FileMetaData, error) {
+func GetFileMetadata(ctx context.Context, file *FileReader) (*format.FileMetaData, error) {
 	if err := checkParquet(file); err != nil {
 		return nil, err
 	}
@@ -55,7 +64,7 @@ func GetPageLocations(fileMetadata *format.FileMetaData) ([]int64, error) {
 	return nil, nil
 }
 
-func getFileMetadataSize(file *types.FileReader) (int64, error) {
+func getFileMetadataSize(file *FileReader) (int64, error) {
 	var fileMetadataLenBuffer [wordLength]byte
 
 	count, err := file.Reader.ReadAt(fileMetadataLenBuffer[:], int64(file.Size-(2*wordLength)))

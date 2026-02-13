@@ -6,24 +6,23 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/RichardNooooh/parquet-go/internal/metadata"
+	"github.com/RichardNooooh/parquet-go/internal/file"
 	// "github.com/RichardNooooh/parquet-go/internal/metadata/gen-go/parquet"
-	"github.com/RichardNooooh/parquet-go/internal/types"
 )
 
 func run() error {
-	file, err := os.Open(os.Args[1])
+	f, err := os.Open(os.Args[1])
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	fileStat, err := file.Stat()
+	defer f.Close()
+	fileStat, err := f.Stat()
 	if err != nil {
 		return err
 	}
 
-	fileReader := types.NewReader(file, fileStat.Size())
-	fileMetadata, err := metadata.GetFileMetadata(context.Background(), fileReader)
+	fileReader := file.NewReader(f, fileStat.Size())
+	fileMetadata, err := file.GetFileMetadata(context.Background(), fileReader)
 	if err != nil {
 		return err
 	}
