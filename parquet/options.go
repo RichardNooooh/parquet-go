@@ -1,3 +1,4 @@
 package parquet
 
-type ParquetOptions struct{}
+type ParquetReaderOption struct{}
+type ParquetWriterOption struct{}
